@@ -5,6 +5,9 @@ from ai.emotion import detect_emotion
 from ai.sentiment import detect_sentiment
 from ai.intent import detect_intent
 from ai.response import generate_response
+from ai.prompt import build_mindmate_prompt
+from ai.llm import generate_llm_response
+from ai.safety import check_response_safety
 
 app = FastAPI(
     title="MindMate AI Service",
@@ -15,7 +18,8 @@ app = FastAPI(
 
 class AnalyzeRequest(BaseModel):
     text: str
-
+class ChatRequest(BaseModel):
+    text: str
 
 @app.get("/")
 def root():
@@ -53,10 +57,46 @@ def analyze_text(request: AnalyzeRequest):
         intent=intent
     )
 
+
+@app.post("/chat")
+def chat(request: ChatRequest):
+
+    text = request.text.strip()
+
+    if not text:
+        return {
+            "error": "Text cannot be empty."
+        }
+
+    # 1. AI analysis
+    emotion = detect_emotion(text)
+    sentiment = detect_sentiment(text)
+    intent = detect_intent(text)
+
+    # 2. Build contextual prompt
+    prompt = build_mindmate_prompt(
+        text=text,
+        emotion=emotion["emotion"],
+        sentiment=sentiment["sentiment"],
+        intent=intent
+    )
+
+    # 3. Generate LLM response
+    ai_response = generate_llm_response(prompt)
+
+    # 4. Safety check
+    safety_result = check_response_safety(ai_response)
+
+    # 5. Final response
     return {
         "text": text,
         "emotion": emotion,
         "sentiment": sentiment,
         "intent": intent,
-        "response": response
+        "response": safety_result["response"],
+        "safety": {
+            "safe": safety_result["safe"]
+        }
     }
+
+    
