@@ -8,12 +8,15 @@ from ai.response import generate_response
 from ai.prompt import build_mindmate_prompt
 from ai.llm import generate_llm_response
 from ai.safety import check_response_safety
+from rag.rag_service import RAGService
 
 app = FastAPI(
     title="MindMate AI Service",
     description="AI backend for MindMate",
     version="1.0.0"
 )
+
+rag_service = RAGService()
 
 
 class AnalyzeRequest(BaseModel):
@@ -73,21 +76,28 @@ def chat(request: ChatRequest):
     sentiment = detect_sentiment(text)
     intent = detect_intent(text)
 
-    # 2. Build contextual prompt
+    # 2. Retrieve relevant knowledge
+    context = rag_service.retrieve_context(
+        text,
+        top_k=3
+    )
+
+    # 3. Build RAG-aware prompt
     prompt = build_mindmate_prompt(
         text=text,
         emotion=emotion["emotion"],
         sentiment=sentiment["sentiment"],
-        intent=intent
+        intent=intent,
+        context=context
     )
 
-    # 3. Generate LLM response
+    # 4. Generate LLM response
     ai_response = generate_llm_response(prompt)
 
-    # 4. Safety check
+    # 5. Safety check
     safety_result = check_response_safety(ai_response)
 
-    # 5. Final response
+    # 6. Final response
     return {
         "text": text,
         "emotion": emotion,
@@ -98,5 +108,3 @@ def chat(request: ChatRequest):
             "safe": safety_result["safe"]
         }
     }
-
-    

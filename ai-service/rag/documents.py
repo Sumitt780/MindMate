@@ -22,8 +22,8 @@ def load_documents() -> list[str]:
 
 def chunk_text(
     text: str,
-    chunk_size: int = 500,
-    overlap: int = 100
+    chunk_size: int = 120,
+    overlap: int = 30
 ) -> list[str]:
     """
     Split text into overlapping word-based chunks.
