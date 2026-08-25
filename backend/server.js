@@ -6,6 +6,7 @@ const authRoutes = require("./routes/auth");
 const entriesRoutes = require("./routes/entries");
 const statsRoutes = require("./routes/stats");
 const aiRoutes = require("./routes/ai");
+const chatRoutes = require("./routes/chat");
 
 const app = express();
 app.use(cors());
@@ -15,6 +16,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/entries", entriesRoutes);
 app.use("/api/stats", statsRoutes);
 app.use("/api/ai", aiRoutes);
+app.use("/api/chat", chatRoutes);
 
 app.get("/api/health", (req, res) => res.json({ ok: true }));
 

@@ -5,11 +5,17 @@ export function getToken() {
 }
 
 export function setSession(token, username) {
-  if (token) localStorage.setItem("mindmate_token", token);
-  else localStorage.removeItem("mindmate_token");
+  if (token) {
+    localStorage.setItem("mindmate_token", token);
+  } else {
+    localStorage.removeItem("mindmate_token");
+  }
 
-  if (username) localStorage.setItem("mindmate_username", username);
-  else localStorage.removeItem("mindmate_username");
+  if (username) {
+    localStorage.setItem("mindmate_username", username);
+  } else {
+    localStorage.removeItem("mindmate_username");
+  }
 }
 
 export function getUsername() {
@@ -43,6 +49,7 @@ async function request(path, options = {}) {
 }
 
 export const api = {
+  // Authentication
   register: (username, password) =>
     request("/auth/register", {
       method: "POST",
@@ -55,6 +62,7 @@ export const api = {
       body: JSON.stringify({ username, password }),
     }),
 
+  // Mood Entries
   getEntries: () => request("/entries"),
 
   saveEntry: (entry) =>
@@ -68,11 +76,27 @@ export const api = {
       method: "DELETE",
     }),
 
+  // Statistics
   getStats: () => request("/stats"),
 
+  // AI Chat
   chat: (text) =>
     request("/ai/chat", {
       method: "POST",
       body: JSON.stringify({ text }),
+    }),
+
+  // Chat History
+  getChat: () => request("/chat"),
+
+  saveChat: (message) =>
+    request("/chat", {
+      method: "POST",
+      body: JSON.stringify(message),
+    }),
+
+  clearChat: () =>
+    request("/chat", {
+      method: "DELETE",
     }),
 };
