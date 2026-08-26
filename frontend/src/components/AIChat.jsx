@@ -1,5 +1,13 @@
 import { useEffect, useRef, useState } from "react";
-import { Loader2, Send, Trash2 } from "lucide-react";
+import {
+  Bot,
+  Loader2,
+  Send,
+  Trash2,
+  Sparkles,
+  User,
+} from "lucide-react";
+
 import { api } from "../api";
 
 export default function AIChat() {
@@ -9,10 +17,13 @@ export default function AIChat() {
   const [historyLoading, setHistoryLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Chat container reference
   const chatContainerRef = useRef(null);
+  const inputRef = useRef(null);
 
-  // Load chat history
+  /* =========================
+     Load chat history
+     ========================= */
+
   useEffect(() => {
     const loadChatHistory = async () => {
       try {
@@ -26,7 +37,9 @@ export default function AIChat() {
         }
       } catch (err) {
         console.error("Chat history error:", err);
-        setError("Unable to load previous conversations.");
+        setError(
+          "Unable to load previous conversations."
+        );
       } finally {
         setHistoryLoading(false);
       }
@@ -35,14 +48,23 @@ export default function AIChat() {
     loadChatHistory();
   }, []);
 
-  // Auto-scroll ONLY inside chat container
+  /* =========================
+     Auto scroll chat only
+     ========================= */
+
   useEffect(() => {
     const container = chatContainerRef.current;
 
     if (!container) return;
 
-    container.scrollTop = container.scrollHeight;
+    requestAnimationFrame(() => {
+      container.scrollTop = container.scrollHeight;
+    });
   }, [messages, loading, historyLoading]);
+
+  /* =========================
+     Send message
+     ========================= */
 
   const handleSend = async () => {
     const text = message.trim();
@@ -57,31 +79,36 @@ export default function AIChat() {
       timestamp: Date.now(),
     };
 
-    // Show user message immediately
-    setMessages((prev) => [...prev, userMessage]);
+    setMessages((prev) => [
+      ...prev,
+      userMessage,
+    ]);
 
     setMessage("");
     setLoading(true);
 
     try {
-      // Save user message
       await api.saveChat(userMessage);
 
-      // Get AI response
       const result = await api.chat(text);
 
       const aiMessage = {
         role: "ai",
-        text: result.response,
-        emotion: result.emotion?.emotion || null,
-        sentiment: result.sentiment?.sentiment || null,
+        text:
+          result?.response ||
+          "I'm here with you. Tell me a little more.",
+        emotion:
+          result?.emotion?.emotion || null,
+        sentiment:
+          result?.sentiment?.sentiment || null,
         timestamp: Date.now(),
       };
 
-      // Show AI response
-      setMessages((prev) => [...prev, aiMessage]);
+      setMessages((prev) => [
+        ...prev,
+        aiMessage,
+      ]);
 
-      // Save AI response
       await api.saveChat(aiMessage);
     } catch (err) {
       console.error("MindMate AI error:", err);
@@ -91,11 +118,24 @@ export default function AIChat() {
       );
     } finally {
       setLoading(false);
+
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 50);
     }
   };
 
+  /* =========================
+     Clear chat
+     ========================= */
+
   const handleClearChat = async () => {
-    if (loading || messages.length === 0) return;
+    if (
+      loading ||
+      messages.length === 0
+    ) {
+      return;
+    }
 
     const confirmed = window.confirm(
       "Are you sure you want to clear your chat history?"
@@ -110,27 +150,49 @@ export default function AIChat() {
 
       setMessages([]);
     } catch (err) {
-      console.error("Clear chat error:", err);
+      console.error(
+        "Clear chat error:",
+        err
+      );
 
-      setError("Unable to clear chat history.");
+      setError(
+        "Unable to clear chat history."
+      );
     }
   };
 
+  /* =========================
+     Keyboard
+     ========================= */
+
   const handleKeyDown = (event) => {
-    if (event.key === "Enter" && !event.shiftKey) {
+    if (
+      event.key === "Enter" &&
+      !event.shiftKey
+    ) {
       event.preventDefault();
       handleSend();
     }
   };
 
+  /* =========================
+     Time
+     ========================= */
+
   const formatTime = (timestamp) => {
     if (!timestamp) return "";
 
-    return new Date(timestamp).toLocaleTimeString([], {
+    return new Date(
+      timestamp
+    ).toLocaleTimeString([], {
       hour: "numeric",
       minute: "2-digit",
     });
   };
+
+  /* =========================
+     Emotion styles
+     ========================= */
 
   const getEmotionStyle = (emotion) => {
     const styles = {
@@ -180,326 +242,343 @@ export default function AIChat() {
         background: "#F5F5F4",
         border: "1px solid #D6D3D1",
         color: "#57534E",
-        emoji: "😐",
+        emoji: "🙂",
       },
     };
 
     return (
-      styles[emotion?.toLowerCase()] || {
-        background: "#F5F5F4",
-        border: "1px solid #D6D3D1",
-        color: "#57534E",
-        emoji: "💭",
-      }
-    );
-  };
-
-  const getSentimentStyle = (sentiment) => {
-    const styles = {
-      positive: {
-        background: "#ECFDF5",
-        border: "1px solid #A7F3D0",
-        color: "#047857",
-        emoji: "✨",
-      },
-
-      negative: {
-        background: "#FEF2F2",
-        border: "1px solid #FECACA",
-        color: "#B91C1C",
-        emoji: "📉",
-      },
-
-      neutral: {
-        background: "#F5F5F4",
-        border: "1px solid #D6D3D1",
-        color: "#57534E",
-        emoji: "➖",
-      },
-    };
-
-    return (
-      styles[sentiment?.toLowerCase()] || {
-        background: "#F5F5F4",
-        border: "1px solid #D6D3D1",
-        color: "#57534E",
-        emoji: "💬",
-      }
+      styles[emotion] ||
+      styles.neutral
     );
   };
 
   return (
-    <section className="mm-card">
-      {/* Header */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-          gap: 12,
-          marginBottom: 16,
-        }}
-      >
-        <div>
-          <h2
-            className="mm-display"
-            style={{
-              fontSize: 20,
-              fontWeight: 600,
-              marginBottom: 4,
-            }}
-          >
-            Talk to MindMate
-          </h2>
+    <section className="mm-ai-card">
 
-          <p
-            style={{
-              fontSize: 13,
-              color: "var(--muted)",
-              margin: 0,
-            }}
-          >
-            Share what's on your mind.
-          </p>
+      {/* =========================
+          Header
+          ========================= */}
+
+      <div className="mm-ai-header">
+
+        <div className="mm-ai-heading">
+
+          <div className="mm-ai-icon">
+            <Bot size={19} />
+          </div>
+
+          <div>
+            <div className="mm-section-kicker">
+              <Sparkles size={13} />
+              MINDMATE AI
+            </div>
+
+            <h2 className="mm-ai-title">
+              Talk it out
+            </h2>
+
+            <p className="mm-ai-subtitle">
+              A private space to reflect,
+              explore, and be heard.
+            </p>
+          </div>
+
         </div>
 
-        {messages.length > 0 && (
-          <button
-            onClick={handleClearChat}
-            disabled={loading}
-            title="Clear chat history"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 5,
-              border: "none",
-              background: "transparent",
-              color: "var(--muted)",
-              fontSize: 11,
-              cursor: loading ? "not-allowed" : "pointer",
-              padding: "5px 7px",
-            }}
-          >
-            <Trash2 size={13} />
-            Clear
-          </button>
-        )}
+        <button
+          type="button"
+          className="mm-ai-clear"
+          onClick={handleClearChat}
+          disabled={
+            loading ||
+            messages.length === 0
+          }
+          aria-label="Clear chat"
+          title="Clear chat"
+        >
+          <Trash2 size={15} />
+          <span>Clear</span>
+        </button>
+
       </div>
 
-      {/* Chat area */}
+      {/* =========================
+          Chat messages
+          ========================= */}
+
       <div
         ref={chatContainerRef}
-        style={{
-          minHeight: 160,
-          maxHeight: 360,
-          overflowY: "auto",
-          marginBottom: 14,
-          paddingRight: 4,
-          scrollBehavior: "smooth",
-        }}
+        className="mm-ai-messages"
       >
-        {/* History loading */}
-        {historyLoading && (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 7,
-              color: "var(--muted)",
-              fontSize: 12,
-              padding: 10,
-            }}
-          >
-            <Loader2 className="mm-spin" size={14} />
-            Loading conversation...
+
+        {historyLoading ? (
+          <div className="mm-ai-loading-history">
+
+            <Loader2
+              className="mm-spin"
+              size={18}
+            />
+
+            <span>
+              Loading your conversations...
+            </span>
+
           </div>
-        )}
+        ) : messages.length === 0 ? (
+          <div className="mm-ai-empty">
 
-        {/* Empty state */}
-        {!historyLoading && messages.length === 0 && (
-          <div
-            style={{
-              padding: 18,
-              borderRadius: 12,
-              background: "var(--surface-2)",
-              color: "var(--muted)",
-              fontSize: 13,
-            }}
-          >
-            Hi, I'm MindMate. How are you feeling today?
-          </div>
-        )}
+            <div className="mm-ai-empty-icon">
+              <Bot size={24} />
+            </div>
 
-        {/* Messages */}
-        {!historyLoading &&
-          messages.map((msg, index) => {
-            const isUser = msg.role === "user";
+            <strong>
+              What's on your mind?
+            </strong>
 
-            return (
-              <div
-                key={`${msg.timestamp || "message"}-${index}`}
-                style={{
-                  display: "flex",
-                  justifyContent: isUser ? "flex-end" : "flex-start",
-                  marginBottom: 14,
-                }}
+            <p>
+              You can talk about your day,
+              your feelings, or anything
+              you'd like to reflect on.
+            </p>
+
+            <div className="mm-ai-suggestions">
+
+              <button
+                type="button"
+                onClick={() =>
+                  setMessage(
+                    "I'm feeling a little stressed today."
+                  )
+                }
               >
-                <div
-                  style={{
-                    maxWidth: "82%",
-                    padding: "10px 13px",
-                    borderRadius: isUser
-                      ? "14px 14px 4px 14px"
-                      : "14px 14px 14px 4px",
-                    background: isUser
-                      ? "var(--surface-2)"
-                      : "var(--background)",
-                    border: isUser
-                      ? "1px solid transparent"
-                      : "1px solid var(--surface-2)",
-                    fontSize: 13,
-                    lineHeight: 1.55,
-                  }}
-                >
-                  {/* Message text */}
-                  <div>{msg.text}</div>
+                I'm feeling stressed
+              </button>
 
-                  {/* Emotion + Sentiment */}
-                  {!isUser &&
-                    (msg.emotion || msg.sentiment) && (
-                      <div
-                        style={{
-                          display: "flex",
-                          flexWrap: "wrap",
-                          gap: 8,
-                          marginTop: 11,
-                        }}
-                      >
-                        {msg.emotion && (
-                          <span
-                            style={{
-                              display: "inline-flex",
-                              alignItems: "center",
-                              gap: 5,
-                              padding: "5px 10px",
-                              borderRadius: 999,
-                              fontSize: 11,
-                              fontWeight: 600,
-                              ...getEmotionStyle(msg.emotion),
-                            }}
-                          >
-                            {getEmotionStyle(msg.emotion).emoji}
-                            Emotion: {msg.emotion}
-                          </span>
-                        )}
+              <button
+                type="button"
+                onClick={() =>
+                  setMessage(
+                    "I had a good day and want to reflect on it."
+                  )
+                }
+              >
+                I had a good day
+              </button>
 
-                        {msg.sentiment && (
-                          <span
-                            style={{
-                              display: "inline-flex",
-                              alignItems: "center",
-                              gap: 5,
-                              padding: "5px 10px",
-                              borderRadius: 999,
-                              fontSize: 11,
-                              fontWeight: 600,
-                              ...getSentimentStyle(msg.sentiment),
-                            }}
-                          >
-                            {getSentimentStyle(msg.sentiment).emoji}
-                            Sentiment: {msg.sentiment}
-                          </span>
-                        )}
-                      </div>
-                    )}
+            </div>
 
-                  {/* Timestamp */}
-                  {msg.timestamp && (
-                    <div
-                      style={{
-                        marginTop: 6,
-                        fontSize: 9,
-                        color: "var(--muted)",
-                        textAlign: isUser ? "right" : "left",
-                      }}
-                    >
-                      {formatTime(msg.timestamp)}
+          </div>
+        ) : (
+          <div className="mm-ai-message-list">
+
+            {messages.map(
+              (msg, index) => {
+                const isUser =
+                  msg.role === "user";
+
+                const emotionStyle =
+                  !isUser &&
+                  msg.emotion
+                    ? getEmotionStyle(
+                        msg.emotion
+                      )
+                    : null;
+
+                return (
+                  <div
+                    key={
+                      `${msg.timestamp || "message"}-${index}`
+                    }
+                    className={`mm-ai-message ${
+                      isUser
+                        ? "user"
+                        : "ai"
+                    }`}
+                  >
+
+                    <div className="mm-ai-message-avatar">
+                      {isUser ? (
+                        <User size={14} />
+                      ) : (
+                        <Bot size={14} />
+                      )}
                     </div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
 
-        {/* AI loading */}
-        {loading && (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 7,
-              color: "var(--muted)",
-              fontSize: 12,
-              marginBottom: 8,
-            }}
-          >
-            <Loader2 className="mm-spin" size={14} />
-            MindMate is thinking...
+                    <div className="mm-ai-message-content">
+
+                      <div className="mm-ai-message-meta">
+                        <strong>
+                          {isUser
+                            ? "You"
+                            : "MindMate"}
+                        </strong>
+
+                        <span>
+                          {formatTime(
+                            msg.timestamp
+                          )}
+                        </span>
+                      </div>
+
+                      <div
+                        className="mm-ai-bubble"
+                        style={
+                          emotionStyle
+                            ? {
+                                background:
+                                  emotionStyle.background,
+                                border:
+                                  emotionStyle.border,
+                                color:
+                                  emotionStyle.color,
+                              }
+                            : undefined
+                        }
+                      >
+                        {msg.text}
+                      </div>
+
+                      {!isUser &&
+                        msg.emotion && (
+                          <div
+                            className="mm-ai-emotion"
+                            style={{
+                              color:
+                                emotionStyle.color,
+                              background:
+                                emotionStyle.background,
+                              border:
+                                emotionStyle.border,
+                            }}
+                          >
+                            <span>
+                              {
+                                emotionStyle.emoji
+                              }
+                            </span>
+
+                            <span>
+                              {msg.emotion}
+                            </span>
+
+                            {msg.sentiment && (
+                              <>
+                                <span>
+                                  ·
+                                </span>
+
+                                <span>
+                                  {
+                                    msg.sentiment
+                                  }
+                                </span>
+                              </>
+                            )}
+                          </div>
+                        )}
+
+                    </div>
+
+                  </div>
+                );
+              }
+            )}
+
+            {/* Typing indicator */}
+
+            {loading && (
+              <div className="mm-ai-message ai">
+
+                <div className="mm-ai-message-avatar">
+                  <Bot size={14} />
+                </div>
+
+                <div className="mm-ai-message-content">
+
+                  <div className="mm-ai-message-meta">
+                    <strong>
+                      MindMate
+                    </strong>
+
+                    <span>
+                      thinking...
+                    </span>
+                  </div>
+
+                  <div className="mm-ai-typing">
+                    <span />
+                    <span />
+                    <span />
+                  </div>
+
+                </div>
+
+              </div>
+            )}
+
           </div>
         )}
+
       </div>
 
-      {/* Input */}
-      <div
-        style={{
-          display: "flex",
-          gap: 8,
-          alignItems: "flex-end",
-        }}
-      >
+      {/* =========================
+          Error
+          ========================= */}
+
+      {error && (
+        <div className="mm-ai-error">
+          {error}
+        </div>
+      )}
+
+      {/* =========================
+          Input
+          ========================= */}
+
+      <div className="mm-ai-input-area">
+
         <textarea
-          className="mm-textarea"
-          rows={2}
+          ref={inputRef}
+          className="mm-ai-input"
           value={message}
-          onChange={(e) => setMessage(e.target.value)}
+          onChange={(event) =>
+            setMessage(
+              event.target.value
+            )
+          }
           onKeyDown={handleKeyDown}
-          placeholder="Tell MindMate what's on your mind..."
-          disabled={loading || historyLoading}
+          placeholder="Write what's on your mind..."
+          rows={2}
+          disabled={loading}
         />
 
         <button
-          className="mm-save-btn"
+          type="button"
+          className="mm-ai-send"
           onClick={handleSend}
-          disabled={!message.trim() || loading || historyLoading}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 6,
-            minHeight: 42,
-          }}
+          disabled={
+            !message.trim() ||
+            loading
+          }
+          aria-label="Send message"
         >
           {loading ? (
-            <Loader2 className="mm-spin" size={15} />
+            <Loader2
+              className="mm-spin"
+              size={17}
+            />
           ) : (
-            <Send size={15} />
+            <Send size={17} />
           )}
-
-          Send
         </button>
+
       </div>
 
-      {/* Error */}
-      {error && (
-        <p
-          style={{
-            marginTop: 10,
-            fontSize: 12,
-            color: "var(--mood-5)",
-          }}
-        >
-          {error}
-        </p>
-      )}
+      <div className="mm-ai-hint">
+        Press Enter to send · Shift + Enter
+        for a new line
+      </div>
+
     </section>
   );
 }
