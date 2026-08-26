@@ -1,69 +1,126 @@
-# MindMate
+# 🌱 MindMate
 
-A mood-tracking app with a real backend and frontend. Each daily check-in
-"plants" a bloom — color encodes mood, size encodes energy — so the past 30
-days show up as a garden strip instead of a plain chart.
+> An AI-powered mood tracking and mental wellness companion built with React, Express, FastAPI, Emotion & Sentiment Analysis, and RAG.
 
-```
-mindmate/
-├── backend/     Express API, JWT auth, JSON file storage
-└── frontend/    React (Vite) client
-```
+MindMate helps users understand and track their emotional well-being through daily mood check-ins, energy tracking, personal journal entries, an AI-powered conversational assistant, emotion/sentiment analysis, and a visual mood garden.
 
-## 1. Run the backend
+---
 
-```bash
-cd backend
-npm install
-cp .env.example .env      # edit JWT_SECRET for anything beyond local dev
-npm run dev                # starts on http://localhost:4000
-```
+## ✨ Features
 
-Data is stored in `backend/data/db.json`, created automatically on first run.
-No database server required.
+### 🌸 Daily Mood Check-ins
 
-## 2. Run the frontend
+- Select a daily mood from five mood states:
+  - Stormy
+  - Cloudy
+  - Still
+  - Sunny
+  - Radiant
+- Track daily energy levels.
+- Add optional journal notes.
+- Update today's entry whenever needed.
+- View previous mood entries in your history.
 
-In a second terminal:
+### 🌱 Mood Garden
 
-```bash
-cd frontend
-npm install
-npm run dev                 # starts on http://localhost:5173
-```
+Each daily check-in creates a visual bloom.
 
-Open http://localhost:5173 — the Vite dev server proxies `/api` requests to
-the backend on port 4000 (see `frontend/vite.config.js`).
+- Bloom color represents mood.
+- Bloom size represents energy.
+- Previous entries appear as a visual garden strip.
+- Makes mood history easier to understand at a glance.
 
-## 3. Use it
+### 📊 Insights & Statistics
 
-Create an account (username + password, min 6 characters), then check in.
-Your token is kept in the browser's `localStorage` and sent as a Bearer
-token on every request.
+MindMate provides mood-related insights including:
 
-## API reference
+- Current streak
+- Top mood
+- Mood trends
+- Recent activity
+- Historical entries
 
-All routes except `/auth/*` require `Authorization: Bearer <token>`.
+### 🤖 AI Mental Wellness Chat
 
-| Method | Path                | Body                              | Description                    |
-|--------|---------------------|------------------------------------|---------------------------------|
-| POST   | /api/auth/register  | `{ username, password }`           | Create account, returns token   |
-| POST   | /api/auth/login     | `{ username, password }`           | Returns token                   |
-| GET    | /api/entries        | –                                   | All entries, keyed by date      |
-| POST   | /api/entries        | `{ date, mood, energy, note }`     | Create/update an entry          |
-| DELETE | /api/entries/:date  | –                                   | Delete an entry                 |
-| GET    | /api/stats          | –                                   | Streak, top mood, 14-day trend  |
+MindMate includes an AI-powered conversational assistant.
 
-Valid `mood` values: `stormy`, `cloudy`, `still`, `sunny`, `radiant`
-(1–5). `energy` is `1` (low), `2` (steady), or `3` (high).
+Users can describe how they are feeling and receive supportive responses.
 
-## Notes for production use
+The AI pipeline includes:
 
-- Swap the JSON file store (`backend/db.js`) for a real database (Postgres,
-  SQLite via `better-sqlite3`, etc.) if you expect concurrent writers.
-- Set a long, random `JWT_SECRET` in `.env` and don't commit `.env`.
-- Add HTTPS / a reverse proxy (nginx, Caddy) in front of the Express app
-  before exposing it publicly.
-- Run `npm run build` in `frontend/` to produce a static bundle in
-  `frontend/dist/`, then serve it from any static host or from Express
-  itself.
+- Emotion classification
+- Sentiment analysis
+- Intent detection
+- Retrieval-Augmented Generation (RAG)
+- Safety-aware responses
+
+### 🧠 Emotion & Sentiment Analysis
+
+AI responses can include:
+
+- Detected emotion
+- Sentiment
+- Confidence information from the AI service
+
+The frontend displays emotion and sentiment badges alongside AI responses.
+
+### 💬 Persistent Chat History
+
+Chat conversations are stored per user.
+
+Features include:
+
+- Load previous conversations
+- Save user messages
+- Save AI responses
+- Preserve emotion and sentiment
+- Timestamps
+- Clear chat history
+- Automatic scrolling to the latest message
+
+### 🔐 Authentication
+
+MindMate includes:
+
+- User registration
+- User login
+- JWT authentication
+- Protected API routes
+- User-specific mood entries
+- User-specific chat history
+
+---
+
+# 🏗️ Architecture
+
+```text
+                         ┌──────────────────────┐
+                         │       React UI       │
+                         │        Vite          │
+                         │    localhost:5173    │
+                         └──────────┬───────────┘
+                                    │
+                                    │ /api
+                                    ▼
+                         ┌──────────────────────┐
+                         │   Express Backend    │
+                         │    localhost:4000    │
+                         │                      │
+                         │ JWT Authentication   │
+                         │ Mood Entries         │
+                         │ Statistics            │
+                         │ Chat History          │
+                         └──────────┬───────────┘
+                                    │
+                                    │ AI Requests
+                                    ▼
+                         ┌──────────────────────┐
+                         │    FastAPI AI        │
+                         │    localhost:8000    │
+                         │                      │
+                         │ Emotion Analysis     │
+                         │ Sentiment Analysis   │
+                         │ Intent Detection     │
+                         │ RAG Pipeline         │
+                         │ Safety Processing    │
+                         └──────────────────────┘
