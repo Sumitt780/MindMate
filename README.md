@@ -60,7 +60,7 @@ AI responses can include:
 
 - Detected emotion
 - Sentiment
-- Confidence information from the AI service
+- Confidence information from the AI services
 
 The frontend displays emotion and sentiment badges alongside AI responses.
 
