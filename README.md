@@ -1,126 +1,70 @@
-# 🌱 MindMate
+\# MindMate
 
-> An AI-powered mood tracking and mental wellness companion built with React, Express, FastAPI, Emotion & Sentiment Analysis, and RAG.
 
-MindMate helps users understand and track their emotional well-being through daily mood check-ins, energy tracking, personal journal entries, an AI-powered conversational assistant, emotion/sentiment analysis, and a visual mood garden.
 
----
+MindMate is an AI-powered mental wellness assistant designed to provide supportive conversations and useful resources through an intelligent chat interface.
 
-## ✨ Features
 
-### 🌸 Daily Mood Check-ins
 
-- Select a daily mood from five mood states:
-  - Stormy
-  - Cloudy
-  - Still
-  - Sunny
-  - Radiant
-- Track all daily energy levels.
-- Add optional journal notes.
-- Update today's entry whenever needed.
-- View previous mood entries in your history.
+\## 🚀 Features
 
-### 🌱 Mood Garden
 
-Each daily check-in creates a visual bloom.
 
-- Bloom color represents mood.
-- Bloom size represents energy.
-- Previous entries appear as a visual garden strip.
-- Makes mood history easier to understand at a glance.
+\- AI-powered conversational assistant
 
-### 📊 Insights & Statistics
+\- Context-aware responses using RAG
 
-MindMate provides mood-related insights including:
+\- Knowledge base integration
 
-- Current streak
-- Top mood
-- Mood trends
-- Recent activity
-- Historical entries
+\- Document processing and retrieval
 
-### 🤖 AI Mental Wellness Chat
+\- Modular AI service architecture
 
-MindMate includes an AI-powered conversational assistant.
+\- Backend API integration
 
-Users can describe how they are feeling and receive supportive responses.
 
-The AI pipeline includes:
 
-- Emotion classification
-- Sentiment analysis
-- Intent detection
-- Retrieval-Augmented Generation (RAG)
-- Safety-aware responses
+\## 🛠️ Tech Stack
 
-### 🧠 Emotion & Sentiment Analysis
 
-AI responses can include:
 
-- Detected emotion
-- Sentiment
-- Confidence information from the AI services
+\- Python
 
-The frontend displays emotion and sentiment badges alongside AI responses.
+\- FastAPI
 
-### 💬 Persistent Chat History
+\- RAG
 
-Chat conversations are stored per user.
+\- Embeddings
 
-Features include:
+\- Vector Search
 
-- Load previous conversations
-- Save user messages
-- Save AI responses
-- Preserve emotion and sentiment
-- Timestamps
-- Clear chat history
-- Automatic scrolling to the latest message
+\- AI/LLM
 
-### 🔐 Authentication
+\- Git \& GitHub
 
-MindMate includes:
 
-- User registration
-- User login
-- JWT authentication
-- Protected API routes
-- User-specific mood entries
-- User-specific chat history
 
----
+\## 📁 Project Structure
 
-# 🏗️ Architecture
+
 
 ```text
-                         ┌──────────────────────┐
-                         │       React UI       │
-                         │        Vite          │
-                         │    localhost:5173    │
-                         └──────────┬───────────┘
-                                    │
-                                    │ /api
-                                    ▼
-                         ┌──────────────────────┐
-                         │   Express Backend    │
-                         │    localhost:4000    │
-                         │                      │
-                         │ JWT Authentication   │
-                         │ Mood Entries         │
-                         │ Statistics            │
-                         │ Chat History          │
-                         └──────────┬───────────┘
-                                    │
-                                    │ AI Requests
-                                    ▼
-                         ┌──────────────────────┐
-                         │    FastAPI AI        │
-                         │    localhost:8000    │
-                         │                      │
-                         │ Emotion Analysis     │
-                         │ Sentiment Analysis   │
-                         │ Intent Detection     │
-                         │ RAG Pipeline         │
-                         │ Safety Processing    │
-                         └──────────────────────┘
+
+mindmate-fullstack/
+
+├── ai-service/
+
+│   ├── ai/
+
+│   ├── knowledge\_base/
+
+│   ├── rag/
+
+│   └── ...
+
+├── frontend/
+
+├── backend/
+
+└── README.md
+
