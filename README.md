@@ -16,7 +16,7 @@ MindMate helps users understand and track their emotional well-being through dai
   - Still
   - Sunny
   - Radiant
-- Track daily energy levels.
+- Track all daily energy levels.
 - Add optional journal notes.
 - Update today's entry whenever needed.
 - View previous mood entries in your history.
