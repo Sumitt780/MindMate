@@ -6,38 +6,78 @@ from rag.context import build_context
 
 
 class RAGService:
+    """
+    MindMate Retrieval-Augmented Generation service.
+
+    It:
+    1. Loads knowledge-base documents.
+    2. Splits them into chunks.
+    3. Creates embeddings.
+    4. Stores the embeddings.
+    5. Retrieves relevant context for user queries.
+    """
 
     def __init__(self):
         print("Initializing RAG service...")
 
-        chunks = load_and_chunk_documents()
-
-        print(f"Loaded {len(chunks)} knowledge chunks.")
-
-        embeddings = create_embeddings(chunks)
-
         self.vector_store = VectorStore()
+        self.retriever = Retriever(self.vector_store)
 
-        self.vector_store.add(
-            chunks,
-            embeddings
-        )
+        try:
+            chunks = load_and_chunk_documents()
 
-        self.retriever = Retriever(
-            self.vector_store
-        )
+            print(f"Loaded {len(chunks)} knowledge chunks.")
 
-        print("RAG service initialized successfully!")
+            if not chunks:
+                print(
+                    "Warning: No knowledge-base documents were found."
+                )
+                return
+
+            embeddings = create_embeddings(chunks)
+
+            if embeddings is None or len(embeddings) == 0:
+                print(
+                    "Warning: Could not create knowledge embeddings."
+                )
+                return
+
+            self.vector_store.add(
+                chunks,
+                embeddings,
+            )
+
+            print(
+                "RAG service initialized successfully!"
+            )
+
+        except Exception as exc:
+            print(f"RAG initialization warning: {exc}")
 
     def retrieve_context(
         self,
         query: str,
-        top_k: int = 3
+        top_k: int = 3,
     ) -> str:
+        """
+        Retrieve relevant knowledge and convert it
+        into context for the LLM.
+        """
 
-        results = self.retriever.retrieve(
-            query,
-            top_k=top_k
-        )
+        query = (query or "").strip()
 
-        return build_context(results)
+        if not query:
+            return "No relevant knowledge was found."
+
+        try:
+            results = self.retriever.retrieve(
+                query,
+                top_k=top_k,
+            )
+
+            return build_context(results)
+
+        except Exception as exc:
+            print(f"RAG retrieval error: {exc}")
+
+            return "No relevant knowledge was found."

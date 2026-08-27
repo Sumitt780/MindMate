@@ -10,24 +10,42 @@ from ai.llm import generate_llm_response
 from ai.safety import check_response_safety
 from rag.rag_service import RAGService
 
+
 app = FastAPI(
     title="MindMate AI Service",
     description="AI backend for MindMate",
-    version="1.0.0"
+    version="1.0.0",
 )
+
+
+# ---------------------------------------------------------
+# RAG service
+# ---------------------------------------------------------
 
 rag_service = RAGService()
 
 
+# ---------------------------------------------------------
+# Request models
+# ---------------------------------------------------------
+
 class AnalyzeRequest(BaseModel):
     text: str
+
+
 class ChatRequest(BaseModel):
     text: str
+
+
+# ---------------------------------------------------------
+# Basic routes
+# ---------------------------------------------------------
 
 @app.get("/")
 def root():
     return {
-        "message": "MindMate AI Service is running!"
+        "message": "MindMate AI Service is running!",
+        "status": "ok",
     }
 
 
@@ -36,13 +54,16 @@ def health_check():
     return {
         "status": "healthy",
         "service": "MindMate AI",
-        "version": "1.0.0"
+        "version": "1.0.0",
     }
 
 
+# ---------------------------------------------------------
+# Text analysis
+# ---------------------------------------------------------
+
 @app.post("/analyze")
 def analyze_text(request: AnalyzeRequest):
-
     text = request.text.strip()
 
     if not text:
@@ -57,13 +78,24 @@ def analyze_text(request: AnalyzeRequest):
     response = generate_response(
         emotion=emotion["emotion"],
         sentiment=sentiment["sentiment"],
-        intent=intent
+        intent=intent,
     )
 
+    return {
+        "text": text,
+        "emotion": emotion,
+        "sentiment": sentiment,
+        "intent": intent,
+        "response": response,
+    }
+
+
+# ---------------------------------------------------------
+# AI Chat
+# ---------------------------------------------------------
 
 @app.post("/chat")
 def chat(request: ChatRequest):
-
     text = request.text.strip()
 
     if not text:
@@ -71,15 +103,15 @@ def chat(request: ChatRequest):
             "error": "Text cannot be empty."
         }
 
-    # 1. AI analysis
+    # 1. Analyze user message
     emotion = detect_emotion(text)
     sentiment = detect_sentiment(text)
     intent = detect_intent(text)
 
-    # 2. Retrieve relevant knowledge
+    # 2. Retrieve relevant MindMate knowledge
     context = rag_service.retrieve_context(
         text,
-        top_k=3
+        top_k=3,
     )
 
     # 3. Build RAG-aware prompt
@@ -88,7 +120,7 @@ def chat(request: ChatRequest):
         emotion=emotion["emotion"],
         sentiment=sentiment["sentiment"],
         intent=intent,
-        context=context
+        context=context,
     )
 
     # 4. Generate LLM response
@@ -97,7 +129,7 @@ def chat(request: ChatRequest):
     # 5. Safety check
     safety_result = check_response_safety(ai_response)
 
-    # 6. Final response
+    # 6. Return final result
     return {
         "text": text,
         "emotion": emotion,
@@ -105,6 +137,6 @@ def chat(request: ChatRequest):
         "intent": intent,
         "response": safety_result["response"],
         "safety": {
-            "safe": safety_result["safe"]
-        }
+            "safe": safety_result["safe"],
+        },
     }

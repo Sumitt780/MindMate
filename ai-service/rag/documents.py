@@ -1,18 +1,27 @@
 from pathlib import Path
 
 
-KNOWLEDGE_BASE_DIR = Path(__file__).resolve().parent.parent / "knowledge_base"
+KNOWLEDGE_BASE_DIR = (
+    Path(__file__).resolve().parent.parent / "knowledge_base"
+)
 
 
 def load_documents() -> list[str]:
     """
-    Load all .txt documents from the knowledge base.
+    Load all non-empty .txt documents from the knowledge base.
     """
 
     documents = []
 
-    for file_path in KNOWLEDGE_BASE_DIR.glob("*.txt"):
-        text = file_path.read_text(encoding="utf-8").strip()
+    if not KNOWLEDGE_BASE_DIR.exists():
+        return documents
+
+    for file_path in sorted(KNOWLEDGE_BASE_DIR.glob("*.txt")):
+        try:
+            text = file_path.read_text(encoding="utf-8").strip()
+        except OSError as exc:
+            print(f"Could not read {file_path.name}: {exc}")
+            continue
 
         if text:
             documents.append(text)
@@ -23,14 +32,22 @@ def load_documents() -> list[str]:
 def chunk_text(
     text: str,
     chunk_size: int = 120,
-    overlap: int = 30
+    overlap: int = 30,
 ) -> list[str]:
     """
     Split text into overlapping word-based chunks.
     """
 
-    words = text.split()
+    if not text or chunk_size <= 0:
+        return []
 
+    if overlap < 0:
+        overlap = 0
+
+    if overlap >= chunk_size:
+        overlap = chunk_size // 4
+
+    words = text.split()
     chunks = []
 
     start = 0
@@ -38,7 +55,7 @@ def chunk_text(
     while start < len(words):
         end = start + chunk_size
 
-        chunk = " ".join(words[start:end])
+        chunk = " ".join(words[start:end]).strip()
 
         if chunk:
             chunks.append(chunk)
@@ -57,11 +74,9 @@ def load_and_chunk_documents() -> list[str]:
     """
 
     documents = load_documents()
-
     all_chunks = []
 
     for document in documents:
-        chunks = chunk_text(document)
-        all_chunks.extend(chunks)
+        all_chunks.extend(chunk_text(document))
 
     return all_chunks

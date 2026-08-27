@@ -1,22 +1,33 @@
-def generate_response(emotion: str, sentiment: str, intent: str) -> str:
+def generate_response(
+    emotion: str,
+    sentiment: str,
+    intent: str,
+) -> str:
+    """
+    Generate a simple fallback response based on
+    detected emotion, sentiment, and intent.
+    """
 
     if intent == "study_stress":
         return (
             "Exam ko lekar worried feel karna understandable hai. "
-            "Chalo situation ko manageable banate hain—pehle important topics "
-            "identify karo aur unhe small study sessions mein divide karo."
+            "Chalo situation ko manageable banate hain — pehle "
+            "important topics identify karo aur unhe small study "
+            "sessions mein divide karo."
         )
 
     if intent == "emotional_support":
         return (
             "Aisa feel karna difficult ho sakta hai. "
-            "Agar tum comfortable ho, batao ki abhi sabse zyada kya bother kar raha hai."
+            "Agar tum comfortable ho, batao ki abhi sabse zyada "
+            "kya bother kar raha hai."
         )
 
     if intent == "anger_support":
         return (
-            "Lag raha hai ki situation ne tumhe kaafi frustrate kiya hai. "
-            "Thoda pause lena aur calmly situation ko break down karna helpful ho sakta hai."
+            "Lag raha hai ki situation ne tumhe kaafi frustrate "
+            "kiya hai. Thoda pause lena aur calmly situation ko "
+            "break down karna helpful ho sakta hai."
         )
 
     if intent == "greeting":
@@ -46,7 +57,8 @@ def generate_response(emotion: str, sentiment: str, intent: str) -> str:
     if emotion == "anger":
         return (
             "Lag raha hai tum kaafi frustrated ho. "
-            "Thoda pause lekar situation ko calmly dekhna helpful ho sakta hai."
+            "Thoda pause lekar situation ko calmly dekhna "
+            "helpful ho sakta hai."
         )
 
     return (
