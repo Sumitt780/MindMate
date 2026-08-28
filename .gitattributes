@@ -1,5 +1,9 @@
 # Exclude React frontend from GitHub language statistics
-frontend/** linguist-vendored
+frontend/** linguist-vendored=true
 
-# Keep Python files detectable
-ai-service/**/*.py linguist-detectable
+# Exclude JavaScript backend from language statistics
+backend/**/*.js linguist-vendored=true
+
+# Make Python AI service count toward language statistics
+ai-service/**/*.py linguist-vendored=false
+ai-service/**/*.py linguist-detectable=true
