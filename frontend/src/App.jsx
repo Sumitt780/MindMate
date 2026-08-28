@@ -37,8 +37,7 @@ export default function App() {
   const [stats, setStats] = useState(null);
   const [error, setError] = useState(null);
 
-  const [activeItem, setActiveItem] =
-    useState("Dashboard");
+  const [activeItem, setActiveItem] = useState("Dashboard");
 
   const [mobileSidebarOpen, setMobileSidebarOpen] =
     useState(false);
@@ -87,12 +86,11 @@ export default function App() {
     });
   }
 
-  const hasNotifications =
-    notifications.length > 0;
+  const hasNotifications = notifications.length > 0;
 
   /*
    * =========================
-   * Load dashboard data
+   * Load data
    * =========================
    */
 
@@ -101,19 +99,16 @@ export default function App() {
     setError(null);
 
     try {
-      const [entriesRes, statsRes] =
-        await Promise.all([
-          api.getEntries(),
-          api.getStats(),
-        ]);
+      const [entriesRes, statsRes] = await Promise.all([
+        api.getEntries(),
+        api.getStats(),
+      ]);
 
       setEntries(entriesRes);
       setStats(statsRes);
     } catch (err) {
       if (
-        err.message
-          ?.toLowerCase()
-          .includes("token")
+        err.message?.toLowerCase().includes("token")
       ) {
         setSession(null, null);
         setAuthed(false);
@@ -144,7 +139,7 @@ export default function App() {
 
   /*
    * =========================
-   * Save today's check-in
+   * Save Check-in
    * =========================
    */
 
@@ -176,7 +171,7 @@ export default function App() {
 
   /*
    * =========================
-   * Delete journal entry
+   * Delete History Entry
    * =========================
    */
 
@@ -226,69 +221,42 @@ export default function App() {
    * =========================
    * Navigation
    * =========================
+   *
+   * IMPORTANT:
+   * No scrollIntoView here.
+   * Only the selected page is rendered.
    */
 
   const handleNavigation = (item) => {
     setActiveItem(item);
     setMobileSidebarOpen(false);
-
-    const sectionMap = {
-      Dashboard: "dashboard",
-      Journal: "journal",
-      "Chat with AI": "ai-chat",
-      "My Garden": "garden",
-      Insights: "insights",
-      History: "history",
-      Profile: "profile",
-      Settings: "settings",
-    };
-
-    const target = sectionMap[item];
-
-    if (!target) {
-      return;
-    }
-
-    setTimeout(() => {
-      const element =
-        document.getElementById(target);
-
-      if (element) {
-        element.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
-      }
-    }, 50);
+    setNotificationsOpen(false);
+    setError(null);
   };
 
   /*
    * =========================
-   * Notification navigation
+   * Notification Navigation
    * =========================
    */
 
-  const handleNotificationClick = (
-    notification
-  ) => {
+  const handleNotificationClick = (notification) => {
     setNotificationsOpen(false);
 
-    if (
-      notification.id === "checkin"
-    ) {
+    if (notification.id === "checkin") {
       handleNavigation("Journal");
+      return;
     }
 
-    if (
-      notification.id === "streak"
-    ) {
+    if (notification.id === "streak") {
       handleNavigation("Insights");
+      return;
     }
   };
 
   /*
    * =========================
-   * Login screen
+   * Login
    * =========================
    */
 
@@ -302,7 +270,7 @@ export default function App() {
 
   /*
    * =========================
-   * Loading screen
+   * Loading
    * =========================
    */
 
@@ -329,12 +297,31 @@ export default function App() {
 
   /*
    * =========================
+   * Page Title
+   * =========================
+   */
+
+  const pageTitles = {
+    Dashboard: "Dashboard",
+    Journal: "Daily Check-in",
+    "Chat with AI": "MindMate AI",
+    "My Garden": "My Garden",
+    Insights: "Insights",
+    History: "Mood History",
+    Profile: "Your Profile",
+    Settings: "Settings",
+  };
+
+  /*
+   * =========================
    * Main Application
    * =========================
    */
 
   return (
     <div className="mm-shell">
+
+      {/* Sidebar */}
 
       <Sidebar
         activeItem={activeItem}
@@ -391,14 +378,13 @@ export default function App() {
 
       </header>
 
+      {/* Main */}
+
       <main className="mm-main">
 
-        {/* Dashboard Header */}
+        {/* Page Header */}
 
-        <section
-          id="dashboard"
-          className="mm-dashboard-header"
-        >
+        <section className="mm-dashboard-header">
 
           <div>
 
@@ -414,25 +400,40 @@ export default function App() {
             </p>
 
             <h1 className="mm-dashboard-title">
-              Good{" "}
-              {new Date().getHours() < 12
-                ? "morning"
-                : new Date().getHours() < 18
-                  ? "afternoon"
-                  : "evening"}
-              , {username || "there"}!
+              {activeItem === "Dashboard"
+                ? `Good ${
+                    new Date().getHours() < 12
+                      ? "morning"
+                      : new Date().getHours() < 18
+                        ? "afternoon"
+                        : "evening"
+                  }, ${username || "there"}!`
+                : pageTitles[activeItem]}
             </h1>
 
             <p className="mm-dashboard-subtitle">
-              Take a moment to check in with
-              yourself today.
+              {activeItem === "Dashboard"
+                ? "Take a moment to check in with yourself today."
+                : activeItem === "Journal"
+                  ? "Reflect on how you are feeling today."
+                  : activeItem === "Chat with AI"
+                    ? "A private space to reflect, explore, and be heard."
+                    : activeItem === "My Garden"
+                      ? "See how your daily check-ins are growing."
+                      : activeItem === "Insights"
+                        ? "Understand your mood patterns and progress."
+                        : activeItem === "History"
+                          ? "Look back at your previous check-ins."
+                          : activeItem === "Profile"
+                            ? "Manage your MindMate identity."
+                            : "Customize your MindMate experience."}
             </p>
 
           </div>
 
-          <div className="mm-dashboard-actions">
+          {/* Header Actions */}
 
-            {/* Notification */}
+          <div className="mm-dashboard-actions">
 
             <div className="mm-notification-wrapper">
 
@@ -460,6 +461,7 @@ export default function App() {
                 <div className="mm-notification-panel">
 
                   <div className="mm-notification-panel-header">
+
                     <div>
                       <strong>
                         Notifications
@@ -484,6 +486,7 @@ export default function App() {
                     >
                       <X size={15} />
                     </button>
+
                   </div>
 
                   <div className="mm-notification-list">
@@ -565,16 +568,53 @@ export default function App() {
           </div>
         )}
 
-        {/* Dashboard Grid */}
+        {/* =================================================
+            ONLY SELECTED PAGE IS RENDERED
+            ================================================= */}
 
-        <div className="mm-dashboard-grid">
+        <div className="mm-page-view">
 
-          <div className="mm-dashboard-main-column">
+          {/* DASHBOARD */}
 
-            <section
-              id="journal"
-              className="mm-dashboard-section"
-            >
+          {activeItem === "Dashboard" && (
+            <div className="mm-dashboard-grid">
+
+              <div className="mm-dashboard-main-column">
+
+                <section className="mm-dashboard-section">
+                  <CheckIn
+                    existingToday={
+                      entries[todayKey]
+                    }
+                    onSave={handleSaveEntry}
+                  />
+                </section>
+
+              </div>
+
+              <aside className="mm-dashboard-side-column">
+
+                <section className="mm-dashboard-section">
+                  <GardenStrip
+                    entries={entries}
+                  />
+                </section>
+
+                <section className="mm-dashboard-section">
+                  <Insights
+                    stats={stats}
+                  />
+                </section>
+
+              </aside>
+
+            </div>
+          )}
+
+          {/* JOURNAL */}
+
+          {activeItem === "Journal" && (
+            <section className="mm-dashboard-section">
               <CheckIn
                 existingToday={
                   entries[todayKey]
@@ -582,65 +622,66 @@ export default function App() {
                 onSave={handleSaveEntry}
               />
             </section>
+          )}
 
-            <section
-              id="ai-chat"
-              className="mm-dashboard-section"
-            >
+          {/* AI CHAT */}
+
+          {activeItem === "Chat with AI" && (
+            <section className="mm-dashboard-section">
               <AIChat />
             </section>
+          )}
 
-            <section
-              id="history"
-              className="mm-dashboard-section"
-            >
-              <History
-                entries={entries}
-                onDelete={
-                  handleDeleteEntry
-                }
-              />
-            </section>
+          {/* GARDEN */}
 
-            <section
-              id="profile"
-              className="mm-dashboard-section"
-            >
-              <Profile />
-            </section>
-
-            <section
-              id="settings"
-              className="mm-dashboard-section"
-            >
-              <Settings />
-            </section>
-
-          </div>
-
-          <aside className="mm-dashboard-side-column">
-
-            <section
-              id="garden"
-              className="mm-dashboard-section"
-            >
+          {activeItem === "My Garden" && (
+            <section className="mm-dashboard-section">
               <GardenStrip
                 entries={entries}
               />
             </section>
+          )}
 
-            <section
-              id="insights"
-              className="mm-dashboard-section"
-            >
+          {/* INSIGHTS */}
+
+          {activeItem === "Insights" && (
+            <section className="mm-dashboard-section">
               <Insights
                 stats={stats}
               />
             </section>
+          )}
 
-          </aside>
+          {/* HISTORY */}
+
+          {activeItem === "History" && (
+            <section className="mm-dashboard-section">
+              <History
+                entries={entries}
+                onDelete={handleDeleteEntry}
+              />
+            </section>
+          )}
+
+          {/* PROFILE */}
+
+          {activeItem === "Profile" && (
+            <section className="mm-dashboard-section">
+              <Profile />
+            </section>
+          )}
+
+          {/* SETTINGS */}
+
+          {activeItem === "Settings" && (
+            <section className="mm-dashboard-section">
+              <Settings />
+            </section>
+          )}
 
         </div>
+
+        {/* Footer */}
 
         <footer className="mm-footer">
 

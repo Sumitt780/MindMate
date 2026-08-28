@@ -3,9 +3,11 @@ import {
   Flame,
   ArrowRight,
   CalendarDays,
+  Flower2,
 } from "lucide-react";
 
 import Bloom from "./Bloom";
+
 import {
   moodById,
   prettyDate,
@@ -14,6 +16,7 @@ import {
 export default function GardenStrip({ entries }) {
   const days = [];
 
+  // Last 30 days
   for (let i = 29; i >= 0; i--) {
     const d = new Date();
 
@@ -27,14 +30,16 @@ export default function GardenStrip({ entries }) {
 
     days.push({
       key,
-      entry: entries[key] || null,
+      entry: entries?.[key] || null,
     });
   }
 
-  const isEmpty = days.every(
-    (day) => !day.entry
-  );
+  // Planted days
+  const plantedDays = days.filter(
+    (day) => day.entry
+  ).length;
 
+  // Current streak
   let streak = 0;
 
   for (let i = days.length - 1; i >= 0; i--) {
@@ -45,19 +50,23 @@ export default function GardenStrip({ entries }) {
     }
   }
 
-  const plantedDays = days.filter(
-    (day) => day.entry
-  ).length;
+  const progress = Math.min(
+    (plantedDays / 30) * 100,
+    100
+  );
 
   return (
     <section className="mm-garden-card">
 
-      {/* Header */}
+      {/* =================================================
+          HEADER
+          ================================================= */}
 
       <div className="mm-garden-header">
+
         <div>
           <div className="mm-section-kicker">
-            <Sprout size={14} />
+            <Sprout size={15} />
             YOUR GARDEN
           </div>
 
@@ -71,102 +80,146 @@ export default function GardenStrip({ entries }) {
         </div>
 
         <div className="mm-garden-streak">
-          <Flame size={16} />
+
+          <Flame size={18} />
 
           <div>
             <strong>{streak}</strong>
-            <span>
-              {streak === 1
-                ? "day streak"
-                : "day streak"}
-            </span>
+            <span>day streak</span>
           </div>
+
         </div>
+
       </div>
 
-      {/* Garden */}
+
+      {/* =================================================
+          GARDEN
+          ================================================= */}
 
       <div className="mm-garden-preview">
 
-        {isEmpty ? (
-          <div className="mm-garden-empty">
+        <div className="mm-garden-grid">
 
-            <div className="mm-garden-empty-icon">
-              <Sprout size={25} />
-            </div>
+          {days.map((day) => {
 
-            <strong>
-              Your garden is waiting
-            </strong>
+            const mood = day.entry
+              ? moodById(day.entry.mood)
+              : null;
 
-            <p>
-              Plant your first mood above
-              to start growing.
-            </p>
+            return (
+              <div
+                key={day.key}
+                className={`mm-garden-day ${
+                  day.entry
+                    ? "has-bloom"
+                    : "empty-day"
+                }`}
+                title={
+                  day.entry
+                    ? `${prettyDate(day.key)} — ${
+                        mood?.label || ""
+                      }`
+                    : `${prettyDate(day.key)} — no check-in`
+                }
+              >
 
-          </div>
-        ) : (
-          <>
-            <div className="mm-garden-row mm-garden-row-new">
+                {day.entry ? (
 
-              {days.map((day) => (
-                <div
-                  key={day.key}
-                  className={`mm-garden-day ${
-                    day.entry
-                      ? "has-bloom"
-                      : "empty-day"
-                  }`}
-                >
-                  {day.entry ? (
-                    <div className="mm-garden-bloom">
-                      <Bloom
-                        moodId={day.entry.mood}
-                        energy={day.entry.energy}
-                        title={`${prettyDate(
-                          day.key
-                        )} — ${
-                          moodById(
-                            day.entry.mood
-                          ).label
-                        }`}
-                      />
-                    </div>
-                  ) : (
-                    <div
-                      className="mm-empty-bloom"
+                  /* ======================================
+                     PLANTED DAY
+                     FLOWER REPLACES + COMPLETELY
+                     ====================================== */
+
+                  <div
+                    className="mm-garden-bloom planted"
+                    style={{
+                      "--bloom-color":
+                        mood?.color || "#a878ff",
+                    }}
+                  >
+
+                    <Bloom
+                      moodId={day.entry.mood}
+                      energy={day.entry.energy}
+                      size={40}
                       title={`${prettyDate(
                         day.key
-                      )} — no check-in`}
-                    >
-                      +
-                    </div>
-                  )}
-                </div>
-              ))}
+                      )} — ${
+                        mood?.label || ""
+                      }`}
+                    />
 
-            </div>
+                  </div>
 
-            <div className="mm-garden-period">
-              <span>
-                <CalendarDays size={11} />
-                Last 30 days
-              </span>
+                ) : (
 
-              <strong>
-                {plantedDays}/30 planted
-              </strong>
-            </div>
-          </>
-        )}
+                  /* ======================================
+                     EMPTY DAY
+                     FLOWER INSTEAD OF +
+                     ====================================== */
+
+                  <div className="mm-empty-flower">
+
+                    <Flower2
+                      size={18}
+                      strokeWidth={1.5}
+                    />
+
+                  </div>
+
+                )}
+
+              </div>
+            );
+          })}
+
+        </div>
+
+
+        {/* =================================================
+            PROGRESS
+            ================================================= */}
+
+        <div className="mm-garden-progress">
+
+          <div className="mm-garden-period">
+
+            <span>
+              <CalendarDays size={14} />
+              Last 30 days
+            </span>
+
+            <strong>
+              <b>{plantedDays}</b>/30 planted
+            </strong>
+
+          </div>
+
+          <div className="mm-garden-progress-track">
+
+            <div
+              className="mm-garden-progress-fill"
+              style={{
+                width: `${progress}%`,
+              }}
+            />
+
+          </div>
+
+        </div>
 
       </div>
 
-      {/* Footer */}
+
+      {/* =================================================
+          FOOTER
+          ================================================= */}
 
       <div className="mm-garden-footer">
 
-        <div>
+        <div className="mm-garden-growth">
+
           <strong>
             {plantedDays === 0
               ? "Start your garden"
@@ -178,15 +231,17 @@ export default function GardenStrip({ entries }) {
           </strong>
 
           <span>
-            Small check-ins create lasting
-            patterns.
+            Small check-ins create lasting patterns.
           </span>
+
         </div>
+
 
         <button
           type="button"
           className="mm-garden-action"
           onClick={() => {
+
             const element =
               document.getElementById(
                 "journal"
@@ -198,10 +253,14 @@ export default function GardenStrip({ entries }) {
                 block: "start",
               });
             }
+
           }}
         >
+
           Check in
-          <ArrowRight size={15} />
+
+          <ArrowRight size={17} />
+
         </button>
 
       </div>

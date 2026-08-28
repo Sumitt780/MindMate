@@ -37,6 +37,7 @@ export default function AIChat() {
         }
       } catch (err) {
         console.error("Chat history error:", err);
+
         setError(
           "Unable to load previous conversations."
         );
@@ -53,14 +54,20 @@ export default function AIChat() {
      ========================= */
 
   useEffect(() => {
-    const container = chatContainerRef.current;
+    const container =
+      chatContainerRef.current;
 
     if (!container) return;
 
     requestAnimationFrame(() => {
-      container.scrollTop = container.scrollHeight;
+      container.scrollTop =
+        container.scrollHeight;
     });
-  }, [messages, loading, historyLoading]);
+  }, [
+    messages,
+    loading,
+    historyLoading,
+  ]);
 
   /* =========================
      Send message
@@ -90,7 +97,8 @@ export default function AIChat() {
     try {
       await api.saveChat(userMessage);
 
-      const result = await api.chat(text);
+      const result =
+        await api.chat(text);
 
       const aiMessage = {
         role: "ai",
@@ -98,9 +106,11 @@ export default function AIChat() {
           result?.response ||
           "I'm here with you. Tell me a little more.",
         emotion:
-          result?.emotion?.emotion || null,
+          result?.emotion?.emotion ||
+          null,
         sentiment:
-          result?.sentiment?.sentiment || null,
+          result?.sentiment?.sentiment ||
+          null,
         timestamp: Date.now(),
       };
 
@@ -110,12 +120,17 @@ export default function AIChat() {
       ]);
 
       await api.saveChat(aiMessage);
+
     } catch (err) {
-      console.error("MindMate AI error:", err);
+      console.error(
+        "MindMate AI error:",
+        err
+      );
 
       setError(
         "MindMate AI is currently unavailable. Please try again in a moment."
       );
+
     } finally {
       setLoading(false);
 
@@ -137,9 +152,10 @@ export default function AIChat() {
       return;
     }
 
-    const confirmed = window.confirm(
-      "Are you sure you want to clear your chat history?"
-    );
+    const confirmed =
+      window.confirm(
+        "Are you sure you want to clear your chat history?"
+      );
 
     if (!confirmed) return;
 
@@ -149,6 +165,7 @@ export default function AIChat() {
       await api.clearChat();
 
       setMessages([]);
+
     } catch (err) {
       console.error(
         "Clear chat error:",
@@ -268,6 +285,7 @@ export default function AIChat() {
           </div>
 
           <div>
+
             <div className="mm-section-kicker">
               <Sparkles size={13} />
               MINDMATE AI
@@ -281,6 +299,7 @@ export default function AIChat() {
               A private space to reflect,
               explore, and be heard.
             </p>
+
           </div>
 
         </div>
@@ -312,6 +331,7 @@ export default function AIChat() {
       >
 
         {historyLoading ? (
+
           <div className="mm-ai-loading-history">
 
             <Loader2
@@ -324,7 +344,9 @@ export default function AIChat() {
             </span>
 
           </div>
+
         ) : messages.length === 0 ? (
+
           <div className="mm-ai-empty">
 
             <div className="mm-ai-empty-icon">
@@ -368,11 +390,14 @@ export default function AIChat() {
             </div>
 
           </div>
+
         ) : (
+
           <div className="mm-ai-message-list">
 
             {messages.map(
               (msg, index) => {
+
                 const isUser =
                   msg.role === "user";
 
@@ -397,16 +422,19 @@ export default function AIChat() {
                   >
 
                     <div className="mm-ai-message-avatar">
+
                       {isUser ? (
                         <User size={14} />
                       ) : (
                         <Bot size={14} />
                       )}
+
                     </div>
 
                     <div className="mm-ai-message-content">
 
                       <div className="mm-ai-message-meta">
+
                         <strong>
                           {isUser
                             ? "You"
@@ -418,6 +446,7 @@ export default function AIChat() {
                             msg.timestamp
                           )}
                         </span>
+
                       </div>
 
                       <div
@@ -427,8 +456,10 @@ export default function AIChat() {
                             ? {
                                 background:
                                   emotionStyle.background,
+
                                 border:
                                   emotionStyle.border,
+
                                 color:
                                   emotionStyle.color,
                               }
@@ -440,17 +471,21 @@ export default function AIChat() {
 
                       {!isUser &&
                         msg.emotion && (
+
                           <div
                             className="mm-ai-emotion"
                             style={{
                               color:
                                 emotionStyle.color,
+
                               background:
                                 emotionStyle.background,
+
                               border:
                                 emotionStyle.border,
                             }}
                           >
+
                             <span>
                               {
                                 emotionStyle.emoji
@@ -474,7 +509,9 @@ export default function AIChat() {
                                 </span>
                               </>
                             )}
+
                           </div>
+
                         )}
 
                     </div>
@@ -487,6 +524,7 @@ export default function AIChat() {
             {/* Typing indicator */}
 
             {loading && (
+
               <div className="mm-ai-message ai">
 
                 <div className="mm-ai-message-avatar">
@@ -496,6 +534,7 @@ export default function AIChat() {
                 <div className="mm-ai-message-content">
 
                   <div className="mm-ai-message-meta">
+
                     <strong>
                       MindMate
                     </strong>
@@ -503,6 +542,7 @@ export default function AIChat() {
                     <span>
                       thinking...
                     </span>
+
                   </div>
 
                   <div className="mm-ai-typing">
@@ -514,9 +554,11 @@ export default function AIChat() {
                 </div>
 
               </div>
+
             )}
 
           </div>
+
         )}
 
       </div>
@@ -550,6 +592,17 @@ export default function AIChat() {
           placeholder="Write what's on your mind..."
           rows={2}
           disabled={loading}
+
+          /* =========================
+             IMPORTANT:
+             Force typed text visibility
+             ========================= */
+
+          style={{
+            color: "#ffffff",
+            WebkitTextFillColor: "#ffffff",
+            caretColor: "#ffffff",
+          }}
         />
 
         <button
@@ -562,6 +615,7 @@ export default function AIChat() {
           }
           aria-label="Send message"
         >
+
           {loading ? (
             <Loader2
               className="mm-spin"
@@ -570,6 +624,7 @@ export default function AIChat() {
           ) : (
             <Send size={17} />
           )}
+
         </button>
 
       </div>
