@@ -23,7 +23,7 @@ It provides a simple space to reflect, track patterns, and understand day-to-day
 * Vite
 * CSS
 
-**AI Service**
+**AI service**
 
 * Python
 * FastAPI
