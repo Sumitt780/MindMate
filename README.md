@@ -1,6 +1,6 @@
 # 🌱 MindMate
 
-MindMate is a full-stack wellness application for daily mood check-ins, journaling, mood tracking, and AI-assisted conversations.
+MindMate is a full-stack wellness application for daily mood check-ins, journaling, mood tracking, and AI-assisted conversations
 
 It provides a simple space to reflect, track patterns, and understand day-to-day emotional changes.
 
